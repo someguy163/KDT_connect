@@ -1,0 +1,110 @@
+.container {
+  margin: 70px auto;
+  height: 100%;
+  max-width: 1600px;
+}
+
+#header {
+  border-style: none;
+}
+
+
+h3{
+  font-weight: bold;
+}
+
+#titleBox {
+  margin:60px 0px 0px 0px;
+}
+
+#btn1 {
+  background-color: #b4b4b4;
+  border-style: none;
+  color: white;
+  width: 50px;
+}
+
+#totalBox {
+  margin: 15px 0px;
+}
+
+#dateBox {
+  display: flex;
+}
+
+#dateBtw {
+  margin: 0px 10px;
+}
+
+#btn2 {
+  background-color:#22D6B2;
+  border-style: none;
+  color: white;
+  width: 100px;
+  margin-left: 30px;
+}
+
+#searchBox {
+  display: flex;
+}
+
+#selectBox {
+  width: 100px;
+}
+
+#itemSearchBox {
+  margin: 15px 0px;
+  display: flex;
+}
+
+#searchText {
+  width: 180px;
+}
+
+#searchText2 {
+  width: 180px;
+}
+
+
+#btn3 {
+  background-color:#22D6B2;
+  border-style: none;
+  color: white;
+  width: 50px;
+}
+
+#orderList {
+  margin-top: 15px;
+}
+
+#titlebox2 {
+  margin-top: 30px;
+}
+
+#btn4 {
+  margin-left: 50px;
+  width: 50px;
+}
+
+#cancleBtn {
+
+  width: 50px;
+}
+
+#btn5 {
+  /* background-color: #FF8C0A; */
+  /* border-style: none; */
+  /* color: white; */
+  width: 50px;
+}
+
+#btn7 {
+  background-color: #FF0000;
+  border-style: none;
+  color: white;
+  width: 50px;
+}
+
+#itemList {
+  margin-top: 30px;
+}

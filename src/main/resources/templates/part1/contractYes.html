@@ -1,0 +1,81 @@
+<table class="table" style="margin: 20px 0 0 5px; width: 1000px; text-align: center;">
+    <thead class="table-secondary">
+    <tr>
+<!--        <th scope="col">사업자 번호</th>-->
+<!--        <th scope="col">품목 넘버</th>-->
+        <th scope="col">계약서</th>
+        <th scope="col">계약날짜</th>
+        <th scope="col">계약여부</th>
+        <th scope="col">비고</th>
+        <th scope="col">품목가격</th>
+    </tr>
+    </thead>
+    <tbody>
+    <th:block th:if="${contractitemList.totalElements != 0}">
+        <tr th:each="AllContractItem:${contractitemList}"> <!--백엔드에서 contractitemList로 보내준 값을 AllContractItem에 저장-->
+            <!-- for문돌리기 -->
+<!--            <td th:text="${AllContractItem.businessId}"></td> &lt;!&ndash;꺼내서 사용&ndash;&gt;-->
+<!--            <td th:text="${AllContractItem.itemIndex}"></td>-->
+            <td th:text="${AllContractItem.contractFile}"></td>
+            <td th:text="${AllContractItem.contractDate}"></td>
+            <td th:text="${AllContractItem.contractYn}"></td>
+            <td th:text="${AllContractItem.contractInfo}"></td>
+            <td th:text="${AllContractItem.contractPrice}"></td>
+        </tr>
+    </th:block>
+    <th:block th:if="${contractitemList.totalElements == 0}">
+        <tr>
+            <td colspan="7">계약 품목이 없습니다.</td>
+        </tr>
+    </th:block>
+    </tbody>
+</table>
+
+<div class="buttons_wrap" style="margin: 30px auto; text-align: center">
+    <tr class="pagination"
+        th:with="start=${(contractitemList.number div 10)*10 + 1},
+           last=${(start + 9 < contractitemList.totalPages ? start + 9 : contractitemList.totalPages)}">
+        <!--한 화면에 몇 페이지까지 보여줄지 계산한 코드-->
+        <td>
+            <a th:onclick="|javascript:AllContractItem(1)|" aria-label="First">
+                <!--onclick은 비동기식이라서 ajax 거쳐서 감, companyListAjax는 js안에 펑션 이름이랑 매칭-->
+                <span aria-hidden="true">첫 페이지</span> <!--첫 페이지 클릭 시 1페이지가 나오게 하는거-->
+            </a>
+        </td>
+
+        <td th:class="${contractitemList.first} ? 'disabled'">
+            <a th:onclick="${contractitemList.first} ? '' : 'javascript:contractitemList('+${contractitemList.number}+')'"
+               aria-label="Previous">
+                <span aria-hidden="true">&lt;</span>
+            </a> <!--삼항 연산자를 통해 첫번째 페이지면 그대로 냅두고 그게 아니라면 해당 페이지보다 -1 페이지로 가게끔 (저 number에 -1값으로 자동으로 되어있음)-->
+            <!--클릭 시 아작스 호출해서 벡엔드로 값을 전달-->
+        </td>
+
+        <th:block th:if="${last != 0}"> <!--첫페이지가 아니면-->
+            <td th:each="page: ${#numbers.sequence(start, last)}"
+                th:class="${page == contractitemList.number + 1} ? 'active'">
+                <a th:text="${page}" th:onclick="|javascript:contractitemList(${page})|"></a>
+                <!--페이지 개수만큼 each문을 돌려서 페이지를 표시 >> 5페이지면 5번돌려서 5페이지 나오게 함-->
+            </td>
+        </th:block>
+        <th:block th:if="${last == 0}"> <!--첫페이지면-->
+            <td class="active">
+                <a th:text="1" th:onclick="|javascript:contractitemList(1)|"></a> <!--무조건 숫자 1만 나오게-->
+            </td>
+        </th:block>
+
+        <td th:class="${contractitemList.last} ? 'disabled'">
+            <a th:onclick="${contractitemList.last} ? '' : 'javascript:contractitemList('+${contractitemList.number+2}+')'"
+               aria-label="Next">
+                <span aria-hidden="true">&gt;</span> <!--삼항 연산자를 통해 마지막 페이지면 그대로 냅두고 그게 아니라면 해당 페이지보다 +1 페이지로 가게끔-->
+            </a>
+        </td>
+
+        <td>
+            <a th:onclick="|javascript:contractitemList(${contractitemList.totalPages})|" aria-label="Last">
+                <!--마지막 페이지 클릭 시 마지막 페이지가 나오게 하는거-->
+                <span aria-hidden="true">마지막 페이지</span>
+            </a>
+        </td>
+    </tr>
+</div>

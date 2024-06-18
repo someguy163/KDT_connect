@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>커넥트 - 제품 등록</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.4.1.js"></script> <!--임포트: jquery를 js에서 사용하기 위해서 -->
+    <script type="text/javascript" th:src="@{/js/part0/productList.js}"></script>
+    <style>
+        .part {
+            float: left;
+        }
+
+        .part::-webkit-scrollbar {
+            display: none;
+        }
+
+        a:not([href]):not([class]), a:not([href]):not([class]):hover {
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+<header th:replace="~{/fragments/common::navbar}">
+</header>
+
+<div class="part" style="margin: 50px 30px 0 10px; height: 900px; width: 620px;">
+    <h3 style="margin: 38px 0 10px 30px; ">제품등록</h3>
+    <hr style="width: 560px; margin-left: 20px">
+    <form th:action="@{/part0/saveProduct}"
+          style="width: 630px; height: 800px; padding: 30px 30px;"
+          th:method="post">
+        <!-- <h4 style="margin: 30px 0 15px 60px; ">품목등록</h4> -->
+        <table class="table" style="margin: 0 10px 0 30px; width: 500px; ">
+            <thead>
+            <tr>
+                <th scope="col" style="width: 100px;">제품정보</th>
+                <th scope="col" style="text-align: center;">입력란</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <th scope="row">제품코드</th>
+                <td>
+                    <div class="d-flex justify-content-between">
+                        <div style="position: relative; display: flex; flex-wrap: wrap; align-items: stretch;">
+                            <input type="text" class="form-control" id="productId"
+                                   aria-label="Dollar amount (with dot and two decimal places)" name="productId" required>
+                        </div>
+                        <div>
+                            <button id="productIdCheck" type="button" class="btn btn-sm btn-danger" onclick="return productIdCheckAjax()">중복체크</button>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">제품이름</th>
+                <td>
+                    <div class="input-group">
+                        <input type="text" class="form-control"
+                               aria-label="Dollar amount (with dot and two decimal places)" id="productName" name="productName" required>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">생산시작일</th>
+                <td colspan="2">
+                    <div class="input-group">
+                        <input type="date" class="form-control"
+                               aria-label="Dollar amount (with dot and two decimal places)" id="productStartdate" name="productStartdate" required>
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">생산종료일</th>
+                <td colspan="2">
+                    <div class="input-group">
+                        <input type="date" class="form-control"
+                               aria-label="Dollar amount (with dot and two decimal places)" id="productEnddate" name="productEnddate" required onchange="validateDates()">
+                    </div>
+                </td>
+            </tr>
+
+            <script>
+                function validateDates() {
+                    var startDate = document.getElementById('productStartdate').value;
+                    var endDate = document.getElementById('productEnddate').value;
+
+                    if (startDate && endDate) {
+                        if (startDate > endDate) {
+                            alert("생산종료일은 생산시작일 이후여야 합니다.");
+                            document.getElementById('productEnddate').value = ""; // 비워줌으로써 사용자가 다시 입력하도록 함
+                        }
+                    }
+                }
+            </script>
+            </tbody>
+        </table>
+        <div style="margin: 40px 0 0 220px;">
+            <button type="submit" class="btn btn-success" th:onclick="caldate()">제품정보 등록</button>
+            <br>
+            <br>
+        </div>
+    </form>
+</div>
+
+
+<div style=" overflow-y: scroll; width: 1200px; height: 1000px;" class="part">
+    <br>
+    <h3 style="margin: 60px 0 20px 30px;">등록된 제품정보</h3>
+    <hr style="width: 100%">
+    <form id="form1"
+          style="width: 1150px; margin-left: 20px; height: 800px; padding: 1px 2px;">
+        <div class="d-flex justify-content-between" style="width: 300px; padding: 10px 10px 20px 10px;">
+            <input type="hidden" id="page" name="page" value="1"> <!--page 값 넘기기-->
+            <input id="searchText" name="searchText" class="form-control me-2" type="text" placeholder="제품코드로 검색">
+            <button class="btn btn-sm btn-success" type="button" onclick="return productListAjax(1);"
+                    style="width: 100px;">검색
+            </button>
+        </div>
+        <div id="productList"></div>
+    </form>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+<script></script>
+</body>
+</html>

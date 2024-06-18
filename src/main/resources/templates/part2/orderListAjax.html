@@ -1,0 +1,163 @@
+<div id="orderList">
+    <table class="table table-bordered text-center">
+        <colgroup>
+            <col width="8%">
+            <col width="10%">
+            <col width="10%">
+            <col width="8%">
+            <col width="8%">
+            <col width="10%">
+            <col width="10%">
+            <col width="10%">
+            <col width="8%">
+            <col width="10%">
+            <col width="8%">
+        </colgroup>
+        <thead>
+        <tr class="table-secondary">
+            <th scope="col">순번</th>
+            <th scope="col">발주번호</th>
+            <th scope="col">품목코드</th>
+            <th scope="col">품목명</th>
+            <th scope="col">수량</th>
+            <th scope="col">발주일</th>
+            <th scope="col">입고예정일</th>
+            <th scope="col">발주상태</th>
+            <th scope="col">마감</th>
+            <th scope="col">발주서 삭제</th>
+            <th scope="col">인쇄</th>
+        </tr>
+        </thead>
+        <tbody>
+        <th:block th:if="${purchaseOrderList.totalElements != 0}"
+                  th:with="start=${(purchaseOrderList.number * purchaseOrderList.size) + 1}">
+            <tr th:each="orderList, status:${purchaseOrderList}" th:id="orderIndex + ${orderList.orderNum}">
+                <td th:text="${start + status.index}"></td>
+                <td th:text="'PN-'+${orderList.orderNum}"></td>
+                <td th:text="${orderList.procurementPlan.contractItem.item.itemCode}"></td>
+                <td th:text="${orderList.procurementPlan.contractItem.item.itemName}"></td>
+                <td th:text="${orderList.orderCount}"></td>
+                <td th:text="${orderList.orderDate}"></td>
+                <td th:text="${orderList.receiveDueDate}"></td>
+                <th:block th:if="${orderList.receive == null}">
+                    <td>발주진행</td> <!--발주서 삭제 가능-->
+                    <td>
+                        <button type="button" class="btn btn-sm btn-primary" disabled>마감
+                        </button>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-danger"
+                                th:onclick="|javascript:deleteOrderAjax(1,-1,${orderList.orderNum})|">삭제
+                        </button>
+                    </td>
+                </th:block>
+                <th:block th:if="${orderList.receive != null}"> <!--발주서 삭제 불가-->
+                    <th:block th:if="${orderList.receive.receiveYn == 'N'}">
+                        <td>입고예정</td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-primary" disabled>마감
+                            </button>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-danger" disabled>삭제
+                            </button>
+                        </td>
+                    </th:block>
+                    <th:block th:if="${orderList.receive.receiveYn == 'Y' && orderList.orderYn == 'N'}">
+                        <td>입고마감</td> <!--발주서 마감 가능-->
+                        <td>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    th:onclick="|javascript:orderDeadlineAjax(1,-1,${orderList.orderNum})|">마감
+                            </button>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-danger" disabled>삭제
+                            </button>
+                        </td>
+                    </th:block>
+                    <th:block th:if="${orderList.receive.receiveYn == 'Y' && orderList.orderYn == 'Y'}">
+                        <td>발주마감</td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    disabled>마감
+                            </button>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    disabled>삭제
+                            </button>
+                        </td>
+                    </th:block>
+                </th:block>
+                <td>
+                    <button type="button" class="btn btn-sm btn-secondary" th:onclick="|javascript:printForm(${orderList.orderNum})|">인쇄</button>
+                    <input type="hidden" class="comName" th:value="${orderList.procurementPlan.contractItem.company.comName}">
+                    <input type="hidden" class="comAdd" th:value="${orderList.procurementPlan.contractItem.company.comAdd}">
+                    <input type="hidden" class="businessId" th:value="${orderList.procurementPlan.contractItem.company.businessId}">
+                    <input type="hidden" class="comManager" th:value="${orderList.procurementPlan.contractItem.company.comManager}">
+                    <input type="hidden" class="itemWidth" th:value="${orderList.procurementPlan.contractItem.item.itemWidth}">
+                    <input type="hidden" class="itemLength" th:value="${orderList.procurementPlan.contractItem.item.itemLength}">
+                    <input type="hidden" class="itemHeight" th:value="${orderList.procurementPlan.contractItem.item.itemHeight}">
+                    <input type="hidden" class="itemMaterial" th:value="${orderList.procurementPlan.contractItem.item.itemMaterial}">
+                    <input type="hidden" class="contractPrice" th:value="${orderList.procurementPlan.contractItem.contractPrice}">
+                    <input type="hidden" class="orderInfo" th:value="${orderList.orderInfo}">
+                </td>
+            </tr>
+        </th:block>
+        <th:block th:if="${purchaseOrderList.totalElements == 0}">
+            <tr>
+                <td colspan="11">발주 리스트가 없습니다.</td>
+            </tr>
+        </th:block>
+        </tbody>
+    </table>
+</div>
+
+<div class="buttons_wrap" style="margin: 30px auto; text-align: center">
+    <tr class="pagination"
+        th:with="start=${(purchaseOrderList.number div 10)*10 + 1},
+           last=${(start + 9 < purchaseOrderList.totalPages ? start + 9 : purchaseOrderList.totalPages)}">
+        <!--한 화면에 몇 페이지까지 보여줄지 계산한 코드-->
+        <td>
+            <a th:onclick="|javascript:orderListAjax(1,-1)|" aria-label="First">
+                <!--onclick은 비동기식이라서 ajax 거쳐서 감, companyListAjax는 js안에 펑션 이름이랑 매칭-->
+                <span aria-hidden="true">첫 페이지</span> <!--첫 페이지 클릭 시 1페이지가 나오게 하는거-->
+            </a>
+        </td>
+
+        <td th:class="${purchaseOrderList.first} ? 'disabled'">
+            <a th:onclick="${purchaseOrderList.first} ? '' : 'javascript:orderListAjax('+${purchaseOrderList.number}+',-1)'"
+               aria-label="Previous">
+                <span aria-hidden="true">&lt;</span>
+            </a> <!--삼항 연산자를 통해 첫번째 페이지면 그대로 냅두고 그게 아니라면 해당 페이지보다 -1 페이지로 가게끔 (저 number에 -1값으로 자동으로 되어있음)-->
+            <!--클릭 시 아작스 호출해서 벡엔드로 값을 전달-->
+        </td>
+
+        <th:block th:if="${last != 0}"> <!--첫페이지가 아니면-->
+            <td th:each="page: ${#numbers.sequence(start, last)}"
+                th:class="${page == purchaseOrderList.number + 1} ? 'active'">
+                <a th:text="${page}" th:onclick="|javascript:orderListAjax(${page},-1)|"></a>
+                <!--페이지 개수만큼 each문을 돌려서 페이지를 표시 >> 5페이지면 5번돌려서 5페이지 나오게 함-->
+            </td>
+        </th:block>
+        <th:block th:if="${last == 0}"> <!--첫페이지면-->
+            <td class="active">
+                <a th:text="1" th:onclick="|javascript:orderListAjax(1,-1)|"></a> <!--무조건 숫자 1만 나오게-->
+            </td>
+        </th:block>
+
+        <td th:class="${purchaseOrderList.last} ? 'disabled'">
+            <a th:onclick="${purchaseOrderList.last} ? '' : 'javascript:orderListAjax('+${purchaseOrderList.number+2}+',-1)'"
+               aria-label="Next">
+                <span aria-hidden="true">&gt;</span> <!--삼항 연산자를 통해 마지막 페이지면 그대로 냅두고 그게 아니라면 해당 페이지보다 +1 페이지로 가게끔-->
+            </a>
+        </td>
+
+        <td>
+            <a th:onclick="|javascript:orderListAjax(${purchaseOrderList.totalPages},-1)|" aria-label="Last">
+                <!—마지막 페이지 클릭 시 마지막 페이지가 나오게 하는거—>
+                <span aria-hidden="true">마지막 페이지</span>
+            </a>
+        </td>
+    </tr>
+</div>

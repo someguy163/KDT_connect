@@ -1,0 +1,93 @@
+<div id="orderList">
+    <table class="table table-bordered text-center">
+        <colgroup>
+            <col width="25%">
+            <col width="25%">
+            <col width="25%">
+            <col width="25%">
+        </colgroup>
+        <thead>
+        <tr class="table-secondary">
+            <th scope="col" colspan="4">공급자정보</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <th scope="row">발주일</th>
+            <td id="orderDate2"></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <th scope="row">업체명</th>
+            <td th:text="${procurementPlan == null} ? '' : ${procurementPlan.contractItem.company.comName}"></td>
+            <th scope="row">사업자 번호</th>
+            <td th:text="${procurementPlan == null} ? '' : ${procurementPlan.contractItem.company.businessId}"></td>
+        </tr>
+        <tr>
+            <th scope="row">주소</th>
+            <td th:text="${procurementPlan == null} ? '' : ${procurementPlan.contractItem.company.comAdd}"></td>
+            <th scope="row">담당자</th>
+            <td th:text="${procurementPlan == null} ? '' : ${procurementPlan.contractItem.company.comManager}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div id="itemList">
+    <input type="hidden" id="onePrice" name="onePrice" th:value="${procurementPlan == null} ? '' : ${procurementPlan.contractItem.contractPrice}">
+    <input type="hidden" id="planNum" name="planNum" th:value="${procurementPlan == null} ? '' :${procurementPlan.planNum}"> <!--planNum이라는 컬럼명으로 데이터 값(value)을 백엔드로 보낸다-->
+    <table class="table table-bordered text-center">
+        <colgroup>
+            <col width="10%">
+            <col width="15%">
+            <col width="15%">
+            <col width="15%">
+            <col width="10%">
+            <col width="10%">
+            <col width="10%">
+            <col width="10%">
+        </colgroup>
+        <thead>
+        <tr class="table-secondary">
+            <th scope="col" colspan="8">품목정보</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>품목코드</td>
+            <td>품목명</td>
+            <td>규격</td>
+            <td>재질</td>
+            <td>수량</td>
+            <td>단가</td>
+
+            <td>공급 가격</td>
+            <td>입고 예정일</td>
+        </tr>
+        <tr>
+            <td th:text="${procurementPlan == null} ? '' : ${procurementPlan.contractItem.item.itemCode}"></td>
+            <td th:text="${procurementPlan == null} ? '' : ${procurementPlan.contractItem.item.itemName}"></td>
+            <td th:text="${procurementPlan == null} ? '' : ${procurementPlan.contractItem.item.itemWidth}+'*'+${procurementPlan.contractItem.item.itemLength}+'*'+${procurementPlan.contractItem.item.itemHeight}"></td>
+            <td th:text="${procurementPlan == null} ? '' : ${procurementPlan.contractItem.item.itemMaterial}"></td>
+            <td><input id="orderCount" name="orderCount" th:value="${procurementPlan == null} ? '' : ${procurementPlan.planCount}" class="form-control form-control-sm" type="number" th:onchange="|javascript:updateTotalPrice(-1)|" required></td>
+            <td id="orderPrice" th:text="${procurementPlan == null} ? '' : ${procurementPlan.contractItem.contractPrice}"></td>
+            <td id="totalPrice1"></td>
+            <td><input id="receiveDueDate" name="receiveDueDate" class="form-control form-control-sm" type="date"></td>
+        </tr>
+        <tr>
+            <td>비고</td>
+            <td scope="col" colspan="5"><input id="orderInfo" name="orderInfo" class="form-control form-control-sm" type="text"></td>
+            <td>합계</td>
+            <td id="totalPrice2"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div th:if="${procurementPlan != null}" style="float: right; margin: 5px 0px 5px 0;">
+    <button id="btn4" type="button" class="btn btn-sm btn-primary" onclick="return saveOrder()">
+        발주
+    </button>
+    <!--<button id="cancleBtn" type="reset" class="btn btn-sm btn-danger" th:onclick="|javascript:updateTotalPrice(${procurementPlan.planCount})|">
+        취소
+    </button>-->
+</div>

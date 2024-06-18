@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>커넥트 - 계약 등록</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.4.1.js"></script> <!--임포트: jquery를 js에서 사용하기 위해서 -->
+<!--    <script type="text/javascript" th:src="@{/js/part1/NocontractItemList.js}"></script>-->
+
+  <style>
+    .part{
+      float: left;
+    }
+    .part::-webkit-scrollbar{
+      display: none;
+    }
+    .table th, .table td {
+      width: 100px; /* 고정 너비 설정 (px 단위) */
+      white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+      text-align: center; /* 텍스트 중앙 정렬 */
+    }
+    .table th.item-index, .table td.item-index { width: 80px; }
+    .table th.item-name, .table td.item-name { width: 150px; }
+    .table th.item-length, .table td.item-length { width: 80px; }
+    .table th.item-width, .table td.item-width { width: 80px; }
+    .table th.item-height, .table td.item-height { width: 80px; }
+    .table th.unit-code, .table td.unit-code { width: 100px; }
+    .table th.assy-code, .table td.assy-code { width: 100px; }
+    .table th.part-code, .table td.part-code { width: 100px; }
+    .table th.item-material, .table td.item-material { width: 120px; }
+
+  </style>
+</head>
+<body>
+<header th:replace="~{/fragments/common::navbar}">
+</header>
+<!--  -->
+<div style=" width: 1870px;  margin-left: 20px; margin-right: 70px; margin-bottom: 30px; clear: both; margin-top: 80px;">
+  <br>
+  <h4 style="margin: 0 0 10px 30px;">선택한 품목정보</h4>
+  <hr style="width: 190px; margin-left: 25px;">
+  <table class="table" style="margin-top: 10px; box-shadow: 0 0 1px 1px rgba(114, 114, 114, 0.4);">
+
+    <thead class="table-secondary">
+    <tr>
+      <th scope="col">품목코드</th>
+      <th scope="col">품목명</th>
+      <th scope="col">가로</th>
+      <th scope="col">세로</th>
+      <th scope="col">높이</th>
+      <th scope="col">대분류</th>
+      <th scope="col">중분류</th>
+      <th scope="col">소분류</th>
+      <th scope="col">재질</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <th scope="col" th:text="${selectItem.itemCode}"></th>
+      <th scope="col" th:text="${selectItem.itemName}"></th>
+      <th scope="col" th:text="${selectItem.itemLength}"></th>
+      <th scope="col" th:text="${selectItem.itemWidth}"></th>
+      <th scope="col" th:text="${selectItem.itemHeight}"></th>
+      <th scope="col" th:text="${selectItem.unit.unitCode}"></th>
+      <th scope="col" th:text="${selectItem.assy.assyCode}"></th>
+      <th scope="col" th:text="${selectItem.part.partCode}"></th>
+      <th scope="col" th:text="${selectItem.itemMaterial}"></th>
+
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+
+
+<div class="part">
+  <h4 style="margin: 115px 0 0 60px; ">신규 계약 등록</h4>
+  <hr style="margin-left: 25px;">
+  <form th:action="@{/part1/saveContractitem}" style="width: 600px; margin: 10px 0 30px 30px; padding: 50px 0 10px 30px; box-shadow: 0 0 1px 1px rgba(114, 114, 114, 0.4); height: 470px;" method="post" enctype="multipart/form-data">
+    <input type="hidden" th:name="itemIndex" th:value="${selectItem.itemIndex}">
+    <table class="table" style="margin-top: 15px;  margin-left: 20px; width: 500px;">
+      <thead>
+      <tr>
+        <th scope="col" style="width: 100px;">계약 정보</th>
+        <th scope="col" style="text-align: center;">입력란</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <th scope="row">계약서</th>
+        <td>
+          <div class="input-group">
+<!--            <input type="hidden" name="">-->
+            <input type="file" class="form-control" aria-label="Dollar amount (with dot and two decimal places)" th:name="file">
+          </div>
+        </td>
+      </tr>
+      <!-- <tr>
+        <th scope="row">업체명</th>
+        <td>
+          <div class="input-group">
+            <input type="text" class="form-control" aria-label="Dollar amount (with dot and two decimal places)">
+          </div>
+        </td>
+
+      </tr> -->
+      <tr>
+        <th scope="row" style="width: 150px;">협력업체 선택</th>
+        <td colspan="2">
+          <select id="AllCompany" name="AllCompany" th:name="CompanyId" style="margin: 0 0 5px 20px; padding: 8px; border-radius: 10px; border-color: rgb(190, 189, 189); " onchange="updateUnitSelectedOption()" required>
+            <option value="">협력업체 선택</option>
+            <th:block th:each="Company : ${AllCompany}">
+              <option  th:text="${Company.comName}"  th:value="${Company.businessId}"></option>
+<!--              <input type="text" th:value="${AllCompany[selectItem.itemIndex]}">-->
+            </th:block>
+          </select>
+        </td>
+      </tr>
+      <!-- <tr>
+        <th scope="row">계좌</th>
+        <td colspan="2">              <div class="input-group">
+          <input type="text" class="form-control" aria-label="Dollar amount (with dot and two decimal places)">
+        </div></td>
+      </tr> -->
+      <tr>
+        <th scope="row">비고</th>
+        <td colspan="2">              <div class="input-group">
+          <input type="text" class="form-control" aria-label="Dollar amount (with dot and two decimal places)" th:name="contractInfo">
+        </div></td>
+      </tr>
+      <tr>
+        <th scope="row">품목 가격</th>
+        <td colspan="2">              <div class="input-group">
+          <input type="number" class="form-control" aria-label="Dollar amount (with dot and two decimal places)" th:name="contractPrice" th:min="0">
+        </div></td>
+      </tr>
+
+      </tbody>
+    </table>
+    <div style="text-align: center; margin-top: 40px;">
+      <button type="submit" class="btn btn-sm btn-success">신규 계약 등록</button>
+      <br>
+      <br>
+    </div>
+  </form>
+</div>
+
+
+
+
+<div  class="part" style="margin: 0 0 0 30px; width: 1205px;">
+
+  <br>
+
+  <h4 style="margin: 90px 0 11px 30px;">등록된 품목정보</h4>
+  <hr>
+  <div style="box-shadow: 0 0 1px 1px rgba(114, 114, 114, 0.4);">
+    <!-- 업체 검색 -->
+    <!--    <form class="d-flex"  action="#" role="search" style="margin-top: 10px; width: 500px; padding: 20px 0 0 40px;">-->
+<!--    <a th:href="@{/part1/contractItem}"><input class="form-control me-2" type="button" aria-label="Search" id="start_date1" >계약완료</a>-->
+<!--    <a th:href="@{/part1/NocontractItem}"><input class="form-control me-2" type="button" aria-label="Search" id="start_date" >계약안됨</a>-->
+    <div style="margin-left: 900px;">
+      <button type="submit" class="btn btn-sm btn-success" th:onclick="|location.href='@{/part1/contractItem}'|" style="margin-top: 15px">계약완료</button>
+      <button type="submit" class="btn btn-sm btn-danger" th:onclick="|location.href='@{/part1/NocontractItem}'|" style="margin-top: 15px">미계약 품목</button>
+    </div>
+    <!--      <input class="form-control me-2" type="date" placeholder="등록된 날짜 검색" aria-label="Search" id="end_date" >-->
+    <!--      <button class="btn btn-outline-success" type="submit" style="width: 120px;" onclick="caldate()">검색</button>-->
+    <!--    </form>-->
+
+
+
+    <!--    <form class="d-flex" id="form1" action="#" role="search" style="margin-top: 10px; width: 500px; padding: 20px 0 0 40px;">-->
+    <!--      <input type="hidden" id="page" name="page" value="1"> &lt;!&ndash;page 값 넘기기&ndash;&gt;-->
+    <!--      <input id="conitemNo" name="conitemNo" type="hidden" th:value="${contractitemList.conitemNo}">-->
+    <!--      <div id="contractList"></div>-->
+    <!--    </form>-->
+
+
+
+
+    <script>
+      function caldate(){
+        var start_date = document.getElementById("start_date").value;
+        var end_date =document.getElementById("end_date").value;
+
+        if(start_date <= end_date){
+        }
+        else if(start_date > end_date){
+          alert("종료날짜를 시작날짜보다 크게 입력하세요");
+        }
+        else{
+          alert("날짜를 입력하세요");
+        }
+      }
+    </script>
+
+
+
+    <!-- 업체 검색 태그 종료 -->
+
+    <div style=" width: 1180px; max-height: 400px; margin: 10px 20px 30px 25px; height: 500px;" >
+      <!--      <form class="d-flex" id="form1" action="#" role="search" style="margin-top: 10px; width: 500px; padding: 20px 0 0 40px;">-->
+      <!--        <input type="hidden" id="page" name="page" value="1"> &lt;!&ndash;page 값 넘기기&ndash;&gt;-->
+      <!--        <input id="conitemNo" name="conitemNo" type="hidden">-->
+      <!--        <div id="contractList"></div>-->
+      <!--      </form>-->
+
+
+
+
+      <table class="table" style="margin: 20px 0 0 5px; width: 1100px; text-align: center;">
+        <thead class="table-secondary">
+        <tr>
+
+          <th scope="col">품목코드</th>
+          <th scope="col">품목명</th>
+
+          <th scope="col">가로</th>
+          <th scope="col">세로</th>
+          <th scope="col">높이</th>
+
+          <th scope="col">대분류</th>
+          <th scope="col">중분류</th>
+          <th scope="col">소분류</th>
+          <th scope="col">재질</th>
+          <th scope="col">선택하기</th>
+        </tr>
+        </thead>
+        <tbody>
+        <th:block th:if="${NocontractItems.totalElements != 0}">
+          <tr th:each="NocontractItems:${NocontractItems}"> <!--백엔드에서 companyList로 보내준 값을 company에 저장-->
+            <!-- for문돌리기 -->
+            <td th:text="${NocontractItems.itemCode}"></td>
+            <td th:text="${NocontractItems.itemName}"></td>
+
+            <td th:text="${NocontractItems.itemLength}"></td>
+            <td th:text="${NocontractItems.itemWidth}"></td>
+            <td th:text="${NocontractItems.itemHeight}"></td>
+
+            <td th:text="${NocontractItems.unit.unitCode}"></td>
+            <td th:text="${NocontractItems.assy.assyCode}"></td>
+            <td th:text="${NocontractItems.part.partCode}"></td>
+            <td th:text="${NocontractItems.itemMaterial}"></td>
+            <td th:value="${NocontractItems.itemIndex}" th:name="selectItemIndex"><a th:href="@{selectContractItem(selectItemIndex=${NocontractItems.itemIndex})}">선택하기</a></td>
+          </tr>
+        </th:block>
+        <th:block th:if="${NocontractItems.totalElements == 0}">
+          <tr>
+            <td colspan="7">업체 내역이 없습니다.</td>
+          </tr>
+        </th:block>
+        </tbody>
+      </table>
+
+      <div class="buttons_wrap" style="margin: 30px auto; text-align: center">
+        <tr class="pagination"
+            th:with="start=${(NocontractItems.number div 10)*10 + 1},
+           last=${(start + 9 < NocontractItems.totalPages ? start + 9 : NocontractItems.totalPages)}">
+          <!--한 화면에 몇 페이지까지 보여줄지 계산한 코드-->
+          <td>
+            <a th:onclick="|javascript:NocontractItems(1)|" aria-label="First">
+              <!--onclick은 비동기식이라서 ajax 거쳐서 감, companyListAjax는 js안에 펑션 이름이랑 매칭-->
+              <span aria-hidden="true">첫 페이지</span> <!--첫 페이지 클릭 시 1페이지가 나오게 하는거-->
+            </a>
+          </td>
+
+          <td th:class="${NocontractItems.first} ? 'disabled'">
+            <a th:onclick="${NocontractItems.first} ? '' : 'javascript:NocontractListAjax('+${NocontractItems.number}+')'"
+               aria-label="Previous">
+              <span aria-hidden="true">&lt;</span>
+            </a> <!--삼항 연산자를 통해 첫번째 페이지면 그대로 냅두고 그게 아니라면 해당 페이지보다 -1 페이지로 가게끔 (저 number에 -1값으로 자동으로 되어있음)-->
+            <!--클릭 시 아작스 호출해서 벡엔드로 값을 전달-->
+          </td>
+
+          <th:block th:if="${last != 0}"> <!--첫페이지가 아니면-->
+            <td th:each="page: ${#numbers.sequence(start, last)}"
+                th:class="${page == NocontractItems.number + 1} ? 'active'">
+              <a th:text="${page}" th:onclick="|javascript:NocontractitemList(${page})|"></a>
+              <!--페이지 개수만큼 each문을 돌려서 페이지를 표시 >> 5페이지면 5번돌려서 5페이지 나오게 함-->
+            </td>
+          </th:block>
+          <th:block th:if="${last == 0}"> <!--첫페이지면-->
+            <td class="active">
+              <a th:text="1" th:onclick="|javascript:NocontractitemList(1)|"></a> <!--무조건 숫자 1만 나오게-->
+            </td>
+          </th:block>
+
+          <td th:class="${NocontractItems.last} ? 'disabled'">
+            <a th:onclick="${NocontractItems.last} ? '' : 'javascript:NocontractListAjax('+${NocontractItems.number+2}+')'"
+               aria-label="Next">
+              <span aria-hidden="true">&gt;</span> <!--삼항 연산자를 통해 마지막 페이지면 그대로 냅두고 그게 아니라면 해당 페이지보다 +1 페이지로 가게끔-->
+            </a>
+          </td>
+
+          <td>
+            <a th:onclick="|javascript:NocontractitemList(${NocontractItems.totalPages})|" aria-label="Last">
+              <!--마지막 페이지 클릭 시 마지막 페이지가 나오게 하는거-->
+              <span aria-hidden="true">마지막 페이지</span>
+            </a>
+          </td>
+        </tr>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+<script ></script>
+</body>
+</html>

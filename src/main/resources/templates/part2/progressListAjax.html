@@ -1,0 +1,54 @@
+<div>
+    <table class="table table-bordered text-center">
+        <colgroup>
+            <col width="10%">
+            <col width="10%">
+            <col width="15%">
+            <col width="15%">
+            <col width="20%">
+            <col width="10%">
+            <col width="10%">
+            <col width="10%">
+        </colgroup>
+        <tbody>
+        <tr class="table-secondary" style="font-weight: bold;">
+            <td>차수</td>
+            <td>검수일자</td>
+            <td>완료수량</td>
+            <td>남은수량</td>
+            <td>검수결과</td>
+            <td>진척도</td>
+            <td>검수처리</td>
+            <td>삭제</td>
+        </tr>
+        <th:block th:if="${not #lists.isEmpty(progressList)}">
+            <input type="hidden" id="remaining" name="remaining" th:value="${remaining}">
+            <tr th:each="progress, status :${progressList}">
+                <td th:text="${progress.progressCount}+'차'"></td>
+                <td th:text="${progress.progressDate}"></td>
+                <td><input th:id="amount+${progress.progressNum}" type="number" th:value="${progress.progressAmount == null}?'':${progress.progressAmount}" th:onchange="|javascript:limitNumber(${progress.progressNum})|"></td>
+                <td th:text="${remaining}"></td>
+                <td><input th:id="result+${progress.progressNum}" type="text" th:value="${progress.progressResult == null}?'':${progress.progressResult}"></td>
+                <td th:text="${progress.progressPercent}+'%'"></td>
+                <td>
+                    <button class="btn btn-sm btn-success" th:if="${progress.progressNum} == ${progressNum}"
+                            th:onclick="|javascript:updateProgress(${progress.progressNum},${progress.orders.orderNum})|">
+                        처리
+                    </button>
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-danger" th:if="${status.last and progress.progressPercent < 100}"
+                            th:onclick="|javascript:deleteProgressAjax(${progress.progressNum},${progress.orders.orderNum})|">
+                        삭제
+                    </button>
+                </td>
+            </tr>
+        </th:block>
+        <th:block th:if="${#lists.isEmpty(progressList)}">
+            <tr>
+                <td colspan="8">검수 처리 내역이 없습니다.</td>
+            </tr>
+        </th:block>
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>커넥트-거래명세서 관리</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- PDF로 저장하기 위해 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.2/jspdf.min.js"></script>
+    <!-- PDF로 저장하기 위해 -->
+    <script type="text/javascript" th:src="@{/js/part3/publishForm.js}"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.js"></script> <!--임포트: jquery를 js에서 사용하기 위해서 -->
+    <link href="/css/part3/publishForm.css" rel="stylesheet">
+    <style>
+
+        /*.container {
+            margin: 70px auto;
+            height: 100%;
+        }*/
+
+        .part {
+            float: left;
+        }
+
+        .part::-webkit-scrollbar {
+            display: none;
+        }
+
+        #titleBox {
+            margin-top: 50px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /*인쇄영역설정*/
+        @page {
+            size: A4 portrait; /* A4 용지 가로 방향 설정 */
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            .print-area, .print-area * {
+                visibility: visible;
+            }
+
+            .print-area {
+                position: absolute;
+                top: 0;
+                width: 100%;
+            }
+
+            .table {
+                width: 147.6%; /* 인쇄 시 테이블 너비 */
+                margin: 0 auto;
+                transform: translateX(-25.5%);
+            }
+        }
+
+    </style>
+</head>
+<body>
+<header th:replace="~{/fragments/common:: navbar}">
+</header>
+
+<!--본문 -->
+<div class="container" >
+    <br>
+    <h3>입고 완료 품목</h3>
+    <hr>
+    <div style="width: 100%; height: 550px;">
+        <!-- 옵션 검색 -->
+        <div style="margin: 8px 0 0 0; width: 99%; padding: 0 0 10px 15px;">
+<!--            <select id="searchOption" style="margin: 0 0 5px 20px; padding: 8px; border-radius: 10px; border-color: rgb(190, 189, 189);">-->
+<!--&lt;!&ndash;                <option value="companyName">업체명</option>&ndash;&gt;-->
+<!--                <option value="itemName">품목명</option>-->
+<!--            </select>-->
+          <div>
+            <form th:action="@{/part3/searchReceive}" method="get" style="float:left; margin-bottom: 5px">
+                <input type="text" id="searchInput" placeholder="품목명 or 회사이름"
+                       style="margin-bottom: 5px; height: 40px; width: 200px; padding: 8px; border-radius: 10px; border-color: rgb(190, 189, 189)" name="searchText">
+                <button type="submit" class="btn btn-sm btn-success" id="searchButton"
+                        style="margin: 0 0 10px 0; height: 40px; padding: 8px; border-radius: 5px;">검색
+                </button>
+            </form>
+            <div style="float:right; margin-bottom: 5px">
+                <button type="submit" class="btn btn-sm btn-primary" onclick="handlePublishButtonClick()"
+                        style="float: right; height: 40px; ">발행
+                </button>
+                <button type="button" class="btn btn-sm btn-primary"
+                        style="height:40px; margin: 0 1167px 10px 0; padding: 8px; border-radius: 5px;"><a th:href="@{/part3/publishForm}" style="color:white; text-decoration: none">전체보기</a>
+                </button>
+            </div>
+          </div>
+        </div>
+        <!-- 옵션 검색 -->
+
+        <div style="min-height: 300px; width: 99%; margin-left: 10px;">
+            <table class="table" style="margin-top: 15px; text-align: center;">
+                <colgroup>
+                    <col width="3">
+                    <col width="10%">
+                    <col width="8%">
+                    <col width="13%">
+                    <col width="15%">
+                    <col width="15%">
+                    <col width="10%">
+                    <col width="10%">
+                    <col width="10%">
+                    <col width="10%">
+                </colgroup>
+                <thead class="table-secondary">
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col">입고일자</th>
+                    <th scope="col">발주번호</th>
+                    <th scope="col">업체명</th>
+                    <th scope="col">품목코드</th>
+                    <th scope="col">품목명</th>
+                    <th scope="col">발주일</th>
+                    <th scope="col">발주수량</th>
+                    <th scope="col">입고수량</th>
+                    <th scope="col">단가</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="receiveList : ${receiveList}">
+                    <!-- publishList에 해당 receiveList.receiveNum이 있는지 확인하고, 없는 경우에만 보여지게 -->
+                    <td th:block th:if="${not #lists.contains(publishList, receiveList.receiveNum)}">
+                        <label>
+                            <input type="radio" th:name="receiveNum" th:value="${receiveList.receiveNum}">
+                        </label>
+                        <input type="hidden" class="receiveNum" th:value="${receiveList.receiveNum}">
+                        <input type="hidden" class="comAdd"
+                               th:value="${receiveList.orders.procurementPlan.contractItem.company.comAdd}">
+                        <input type="hidden" class="businessId"
+                               th:value="${receiveList.orders.procurementPlan.contractItem.company.businessId}">
+                        <input type="hidden" class="comManager"
+                               th:value="${receiveList.orders.procurementPlan.contractItem.company.comManager}">
+                    </td>
+                    <td th:text="${receiveList.receiveDate}"></td>
+                    <td th:text="${receiveList.orders.orderNum}"></td>
+                    <td th:text="${receiveList.orders.procurementPlan.contractItem.company.comName}"></td>
+                    <td th:text="${receiveList.orders.procurementPlan.contractItem.item.itemCode}"></td>
+                    <td th:text="${receiveList.orders.procurementPlan.contractItem.item.itemName}"></td>
+                    <td th:text="${receiveList.orders.orderDate}"></td>
+                    <td th:text="${receiveList.orders.orderCount}"></td>
+                    <td th:text="${receiveList.orders.orderCount}"></td>
+                    <td th:text="${receiveList.orders.procurementPlan.contractItem.contractPrice}">
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!--</div>-->
+
+    <!-- 거래명세서 작성 -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <form th:action="@{/part3/savePublish}" method="post">
+
+                <!-- 숨겨진 입력 필드 -->
+                <!--                <input type="radio" th:name="receiveNum" th:value="${receiveList[receiveList]}">-->
+                <input type="hidden" id="hiddenReceiveNum" name="receiveNum">
+                <input type="hidden" id="hiddenComAdd" name="comAdd">
+                <input type="hidden" id="hiddenBusinessId" name="businessId">
+                <input type="hidden" id="hiddenComManager" name="comManager">
+
+                <h3 style="margin: 10px 0 15px 70px;">거래명세서 작성</h3>
+
+                <div style="box-shadow: 0 0 8px 8px rgba(114, 114, 114, 0.4); width: 96%;">
+                    <div class="print-area">
+                        <div id="orderList" style="width: 85%; margin: 15px 0 0 100px; padding: 2px 0 0 0;">
+                            <table class="table table-bordered text-center">
+                                <thead>
+                                <tr class="table-secondary">
+                                    <th scope="col" colspan="4">거래명세서</th>
+                                </tr>
+                                <colgroup>
+                                    <col width="25%">
+                                    <col width="25%">
+                                    <col width="25%">
+                                    <col width="25%">
+                                </colgroup>
+                                <tr>
+                                    <th>거래명세서 번호</th>
+                                    <td id="invoiceNumber"><input name="invoiceNumber" placeholder="invoiceNumber"></td>
+                                    <th>입고번호</th>
+                                    <td id="receiveNum"><input name="receiveNum" placeholder="receiveNum"></td>
+
+                                    <!--                <th>발행일</th>-->
+                                    <!--                <td id="invoiceDate"><input type="date" name="invoiceDate" th:value="${receiveList.}" placeholder="invoiceDate"></td>-->
+                                </tr>
+                                </thead>
+                            </table>
+
+                            <table class="table table-bordered text-center">
+                                <colgroup>
+                                    <col width="25%">
+                                    <col width="25%">
+                                    <col width="25%">
+                                    <col width="25%">
+                                </colgroup>
+                                <thead>
+                                <tr class="table-secondary">
+                                    <th scope="col" colspan="4">공급자</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <th scope="row">발주일</th>
+                                    <td id="orderDate"></td>
+                                    <th scope="row">입고일</th>
+                                    <td id="receiveDate"></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">업체명</th>
+                                    <td id="comName"></td>
+                                    <th scope="row">사업자 번호</th>
+                                    <td><span id="businessId"></span></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">주소</th>
+                                    <td><span id="comAdd"></span></td>
+                                    <th scope="row">담당자</th>
+                                    <td><span id="comManager"></span></td>
+                                </tr>
+                                </tbody>
+                            </table>
+
+                            <table class="table table-bordered text-center">
+                                <colgroup>
+                                    <col width="25%">
+                                    <col width="25%">
+                                    <col width="25%">
+                                    <col width="25%">
+                                </colgroup>
+                                <thead>
+                                <tr class="table-secondary">
+                                    <th scope="col" colspan="4">공급받는자</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <th scope="row">업체명</th>
+                                    <td id="recipientCompanyName">(주)CONNECT</td>
+                                    <th scope="row">사업자 번호</th>
+                                    <td id="recipientBusinessNumber">123-45-6789</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">주소</th>
+                                    <td id="recipientAddress">경기도 수원시 123</td>
+                                    <th scope="row">담당자</th>
+                                    <td id="Publisher" th:text="${session.loginedUser.memberId}"><input name="Publisher"
+                                                                                                        placeholder="Publisher">
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div id="itemList" style="width: 85%; margin: 0 0 0 100px;">
+                            <table class="table table-bordered text-center">
+                                <colgroup>
+                                    <col width="10%">
+                                    <col width="10%">
+                                    <col width="15%">
+                                    <col width="8%">
+                                    <col width="8%">
+                                    <col width="10%">
+                                    <col width="15%">
+                                </colgroup>
+                                <thead>
+                                <tr class="table-secondary">
+                                    <th scope="col" colspan="10">품목정보</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <th>발주번호</th>
+                                    <th>품목코드</th>
+                                    <th>품목명</th>
+                                    <th>수량</th>
+                                    <th>단가</th>
+                                    <th>총액</th>
+                                    <th>비고</th>
+                                </tr>
+                                <tr>
+                                    <td id="orderNum"></td>
+                                    <td id="itemCode"></td>
+                                    <td id="itemName"></td>
+                                    <td id="orderCount"></td>
+                                    <td id="contractPrice"></td>
+                                    <td id="totalPrice"></td>
+                                    <td id="invoiceMemo"><input type="text"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="no-print">
+                        <div style="text-align: center; margin: 30px 0 0 0;">
+                            <!-- 발행 버튼 -->
+                            <button type="submit" class="btn btn-outline-success" id="saveSuccess">저장</button>
+                            <button type="button" class="btn btn-outline-success" onclick="window.print()">인쇄</button>
+                            <button type="button" class="btn btn-outline-success" onclick="saveAsPDF()">PDF로 저장</button>
+                            <br>
+                            <br>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- 거래명세서 작성 -->
+
+    <!-- 거래명세서 발행 완료 -->
+    <div style="width: 100%;">
+        <br>
+        <h3 style="margin-bottom: 15px;">거래명세서 발행 리스트</h3>
+        <hr>
+        <!--  <div style="margin: 15px 0 0 27px; width: 98%; box-shadow: 0 0 8px 8px rgba(114, 114, 114, 0.4)">-->
+        <!--    <button type="button" class="btn btn-outline-success show"  onclick="handlePublishButtonClick()" style="float: right; margin: 20px 40px 20px 0;">명세서 보기</button>-->
+
+        <table class="table"
+               style="text-align: center; width: 100%;">
+            <colgroup>
+                <col width="8%">
+                <col width="10%">
+                <col width="10%">
+                <col width="8%">
+                <col width="10%">
+                <col width="13%">
+                <col width="12%">
+                <col width="8%">
+                <col width="8%">
+                <col width="8%">
+                <col width="5%">
+            </colgroup>
+            <thead class="table-secondary">
+            <tr>
+                <th scope="col">명세서 번호</th>
+                <th scope="col">발행일</th>
+                <th scope="col">입고일자</th>
+                <th scope="col">발주번호</th>
+                <th scope="col">업체명</th>
+                <th scope="col">품목코드</th>
+                <th scope="col">품목명</th>
+                <th scope="col">발주수량</th>
+                <th scope="col">입고수량</th>
+                <th scope="col">발행담당자</th>
+                <th scope="col"></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="publish : ${publishList}">
+                <td th:text="${publish.invoiceNumber}"></td>
+                <td th:text="${publish.invoiceDate}"></td>
+                <td th:text="${publish.receive.receiveDate}"></td>
+                <td th:text="${publish.receive.orders.orderNum}"></td>
+                <td th:text="${publish.receive.orders.procurementPlan.contractItem.company.comName}"></td>
+                <td th:text="${publish.receive.orders.procurementPlan.contractItem.item.itemCode}"></td>
+                <td th:text="${publish.receive.orders.procurementPlan.contractItem.item.itemName}"></td>
+                <td th:text="${publish.receive.orders.orderCount}"></td>
+                <td th:text="${publish.receive.orders.orderCount}"></td>
+                <td th:text="${publish.publisher}"></td>
+                <td><a th:href="@{/part3/invoice(invoiceNumber=${publish.getInvoiceNumber()})}">명세서</a></td>
+            </tr>
+            </tbody>
+        </table>
+        <!--  </div>-->
+    </div>
+    <!-- 거래명세서 발행 완료 -->
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        // 저장 완료 알림 창 표시
+        var successMessage = [[${successMessage}]];
+        if (successMessage) {
+            alert(successMessage);
+        }
+
+        // 저장 실패 알림 창 표시
+        var errorMessage = [[${errorMessage}]];
+        if (errorMessage) {
+            alert(errorMessage);
+        }
+        /*]]>*/
+    </script>
+<!--    <script>-->
+<!--        document.getElementById("searchButton").addEventListener("click", function() {-->
+<!--            const searchOption = document.getElementById("searchOption").value;-->
+<!--            const searchInput = document.getElementById("searchInput").value;-->
+
+<!--            // const url = `/publishForm?option=${searchOption}&keyword=${encodeURIComponent(searchInput)}`;-->
+<!--            const url = '/part3/searchReceive';-->
+<!--            window.location.href = url;-->
+<!--        });-->
+<!--    </script>-->
+
+</div>
+</body>
+</html>

@@ -1,0 +1,77 @@
+.container {
+  margin: 70px auto;
+  height: 100%;
+}
+
+#header {
+  background-color: #14148C;
+  border-style: none;
+}
+
+
+h3{
+  font-weight: bold;
+}
+
+#titleBox {
+  margin:60px 0px 0px 0px;
+}
+
+/*#btn1 {*/
+/*  background-color: #b4b4b4;*/
+/*  border-style: none;*/
+/*  color: white;*/
+/*  width: 50px;*/
+/*}*/
+
+
+#totalBox {
+  margin: 15px 0px;
+}
+
+#dateBox {
+  display: flex;
+}
+
+
+/*#dateBtw {*/
+/*  margin: 0px 10px;*/
+/*}*/
+
+
+/*#btn2 {*/
+/*  background-color:#22D6B2;*/
+/*  border-style: none;*/
+/*  color: white;*/
+/*  width: 50px;*/
+/*  margin-left: 30px;*/
+/*}*/
+
+#searchBox {
+  display: flex;
+}
+
+#selectBox {
+  width: 100px;
+}
+
+#itemSearchBox {
+  margin: 15px 0px;
+  display: flex;
+}
+
+#searchText {
+  width: 180px;
+}
+
+
+#inspectDate{
+  margin: auto;
+  width: 40%;
+}
+
+a:not([href]):not([class]), a:not([href]):not([class]):hover {
+  cursor: pointer;
+}
+
+
